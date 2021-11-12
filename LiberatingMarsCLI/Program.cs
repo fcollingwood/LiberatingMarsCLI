@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -34,7 +34,7 @@ namespace LiberatingMarsCLI
 
         public static void Main(string[] args)
         {
-            chituLocation = args[0];
+	    chituLocation = args[0];
 
             Console.WriteLine("\n> LiberatingMars CLI v0.3 <");
             if (isWindows)
@@ -195,9 +195,9 @@ namespace LiberatingMarsCLI
             newH.SmallPreviewOffset = oldH.PreviewSmallOffsetAddress + 0xD0;
             newH.PrintTime = oldH.PrintTime;
             newH.unknown5 = 0x1;
-            newH.BottomLiftDistance = oldH.ppBottomLiftHeight;
+            newH.BottomLiftDistance = 8.0f;
             newH.BottomLiftSpeed = oldH.ppBottomLiftSpeed;
-            newH.LiftDistance = oldH.ppLiftHeight;
+            newH.LiftDistance = 7.0f;
             newH.LiftSpeed = oldH.ppLiftSpeed;
             newH.RetractSpeed = oldH.ppRetractSpeed;
             newH.ModelVolume = oldH.ppVolumeMl;
@@ -208,31 +208,31 @@ namespace LiberatingMarsCLI
             newH.LightPWM = oldH.LightPWM;
             newH.BottomLightPWM = oldH.BottomLightPWM;
             newH.LayerXorKey = oldH.EncryptionKey;
-            newH.BottomLiftDistance2 = oldH.sBottomLiftSpeed2;
-            newH.BottomLiftSpeed2 = oldH.sBottomLiftSpeed2;
-            newH.LiftingDistance2 = oldH.sLiftHeight2;
-            newH.LiftingSpeed2 = oldH.sLiftSpeed2;
-            newH.RetractDistance2 = oldH.sRetractHeight2;
-            newH.RetractSpeed2 = oldH.sRetractSpeed2;
+            newH.BottomLiftDistance2 = oldH.ppBottomLiftHeight - newH.BottomLiftDistance;
+            newH.BottomLiftSpeed2 = oldH.ppRetractSpeed;
+            newH.LiftingDistance2 = oldH.ppLiftHeight - newH.LiftDistance;
+            newH.LiftingSpeed2 = oldH.ppRetractSpeed;
+            newH.RetractDistance2 = 4.0f;
+            newH.RetractSpeed2 = 30.0f;
             newH.RestTimeAfterLift = oldH.sRestTimeAfterLift;
             newH.PrinterNameOffset = oldH.sMachineNameAddress;
             newH.PrinterNameSize = oldH.sMachineNameSize;
             newH.unknown12 = 0xF;
             newH.unknown13 = 0;
             newH.unknown14 = 0x8;
-            newH.RestTimeAfterRetract = oldH.sRestTimeAfterRetract;
-            newH.RestTimeAfterLift_2 = oldH.sRestTimeAfterLift2;
+            newH.RestTimeAfterRetract = 1f;
+            newH.RestTimeAfterLift_2 = 1f;
             newH.unknown15 = 0;
             newH.BottomRetractSpeed = oldH.ppRetractSpeed;
-            newH.BottomRetractSpeed2 = oldH.sRetractSpeed2;
+            newH.BottomRetractSpeed2 = 30.0f;
             newH.unknown15_2 = 0;
             newH.unknown16 = 4;
             newH.unknown17 = 0;
             newH.unknown18 = 4;
-            newH.RestTimeAfterRetract_2 = newH.RestTimeAfterRetract;
-            newH.RestTimeAfterLift_3 = newH.RestTimeAfterLift;
-            newH.RestTimeBeforeLift = oldH.sRestTimeAfterRetract;
-            newH.BottomRetractDistance = oldH.ppBottomLiftHeight;
+            newH.RestTimeAfterRetract_2 = 1000.0f;
+            newH.RestTimeAfterLift_3 = 1000.0f;
+            newH.RestTimeBeforeLift = 0.400f;
+            newH.BottomRetractDistance = oldH.ppBottomLiftHeight - newH.RetractDistance2;
             newH.unknown23 = 302;
             newH.unknown24 = 0x101;
             newH.unknown25 = 0x4;
@@ -379,6 +379,9 @@ namespace LiberatingMarsCLI
             binRead.Close();
 
             translateLayers();
+
+            File.Delete(ctbLocation);
+            File.Move(ctbLocation.Replace(".ctb", "_MARS3.ctb"), ctbLocation);
         }
 
         public static void translateLayers()
@@ -431,10 +434,25 @@ namespace LiberatingMarsCLI
 
                 newLay.LayerHeaderLength = newLay.Unknown2;
                 newLay.ZHeight = oldLay.LayerPositionZ;
-                if (i < oldH.BottomLayersCount)
+                if (i < oldH.BottomLayersCount) {
                     newLay.BottomExposureDuration = oldH.BottomExposureSeconds;
+                    newLay.LiftDistance = oldH.ppBottomLiftHeight;
+                    newLay.LiftSpeed = oldH.ppBottomLiftSpeed;
+                    newLay.LiftDistance2 = newH.BottomLiftDistance2;
+                    newLay.LiftSpeed2 = newH.BottomLiftSpeed2;
+                    newLay.RetractDistance2 = newH.RetractDistance2;
+                    newLay.RetractSpeed2 = newH.BottomRetractSpeed2;
+                }
                 else
+                {
                     newLay.BottomExposureDuration = oldH.LayerExposureSeconds;
+                    newLay.LiftDistance = oldH.ppLiftHeight;
+                    newLay.LiftSpeed = oldH.ppLiftSpeed;
+                    newLay.LiftDistance2 = newH.LiftingDistance2;
+                    newLay.LiftSpeed2 = newH.LiftingSpeed2;
+                    newLay.RetractDistance2 = newH.RetractDistance2;
+                    newLay.RetractSpeed2 = newH.RetractSpeed2;
+                }
                 newLay.LightOffDelay = oldH.LightOffDelay;
                 newLay.LayerDataOffset = Offset2 + newLay.LayerHeaderLength;
                 newLay.unknown2 = 0;
@@ -442,24 +460,10 @@ namespace LiberatingMarsCLI
                 newLay.unknown3 = 0;
                 newLay.EncryptedDataOffset = 0;
                 newLay.EncryptedDataLength = 0;
-                if (i > oldH.BottomLayersCount)
-                {
-                    newLay.LiftDistance = oldH.ppLiftHeight;
-                    newLay.LiftSpeed = oldH.ppLiftSpeed;
-                }
-                else
-                {
-                    newLay.LiftDistance = oldH.ppBottomLiftHeight;
-                    newLay.LiftSpeed = oldH.ppBottomLiftSpeed;
-                }
-                newLay.LiftDistance2 = 0;
-                newLay.LiftSpeed2 = 0;
                 newLay.RetractSpeed = oldH.ppRetractSpeed;
-                newLay.RetractDistance2 = 0;
-                newLay.RetractSpeed2 = 0;
-                newLay.RestTimeBeforeLift = 0;
-                newLay.RestTimeAfterLift = oldH.sRestTimeAfterLift;
-                newLay.RestTimeAfterRetract = oldH.sRestTimeAfterRetract;
+                newLay.RestTimeBeforeLift = newH.RestTimeBeforeLift;
+                newLay.RestTimeAfterLift = newH.RestTimeAfterLift;
+                newLay.RestTimeAfterRetract = newH.RestTimeAfterRetract;
                 newLay.LightPWM = oldH.LightPWM;
                 newLay.unknown6 = 0;
 
