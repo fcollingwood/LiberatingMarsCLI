@@ -29,12 +29,18 @@ namespace LiberatingMarsCLI
 
         static PullCrypto crypto = new PullCrypto();
         static AES aes = new AES();
+		
+		static float slowLiftHeight = 0;
+        static float slowRetractHeight = 0;
+        static float pauseBeforeLift = 0;
+        static float pauseAfterLift = 0;
+        static float pauseAfterRetract = 0;
 
         public static String chituLocation;
 
         public static void Main(string[] args)
         {
-	    chituLocation = args[0];
+            chituLocation = args[0];
 
             Console.WriteLine("\n> LiberatingMars CLI v0.3 <");
             if (isWindows)
@@ -46,19 +52,39 @@ namespace LiberatingMarsCLI
 
             ctbLocation = args[1];
 
-            if (args[0] != null)
+            if (args[0] == null)
+                Console.WriteLine("ERROR: ChiTuBox path not provided!");
+  
+            if (args[2] != null) 
+                slowLiftHeight = float.Parse(args[2]);
+
+            if (args[3] != null) 
+                slowRetractHeight = float.Parse(args[3]);
+
+            if (args[4] != null) 
+                pauseBeforeLift = float.Parse(args[4]);
+
+            if (args[5] != null) 
+                pauseAfterLift = float.Parse(args[5]);
+
+            if (args[6] != null)
+                pauseAfterRetract = float.Parse(args[6]);
+			
+			if (args[0] != null)
                 if (File.Exists(args[0]))
                     translateHeader();
                 else
                     Console.WriteLine("ERROR: Invalid ChiTuBox path!\nClosing...");
-
-            if (args[0] == null)
-                Console.WriteLine("ERROR: ChiTuBox path not provided!");
-        }
+		}	
 
         public String chituLocation2 = chituLocation;
         public static void translateHeader()
         {
+			Console.WriteLine(slowLiftHeight);
+			Console.WriteLine(slowRetractHeight);
+			Console.WriteLine(pauseBeforeLift);
+			Console.WriteLine(pauseAfterLift);
+			Console.WriteLine(pauseAfterRetract);
             ctbContent = File.ReadAllBytes(ctbLocation);
             MemoryStream ms = new MemoryStream(ctbContent);
             BinaryReader binRead = new BinaryReader(ms);
@@ -195,9 +221,9 @@ namespace LiberatingMarsCLI
             newH.SmallPreviewOffset = oldH.PreviewSmallOffsetAddress + 0xD0;
             newH.PrintTime = oldH.PrintTime;
             newH.unknown5 = 0x1;
-            newH.BottomLiftDistance = 8.0f;
+            newH.BottomLiftDistance = slowLiftHeight;
             newH.BottomLiftSpeed = oldH.ppBottomLiftSpeed;
-            newH.LiftDistance = 7.0f;
+            newH.LiftDistance = slowLiftHeight;
             newH.LiftSpeed = oldH.ppLiftSpeed;
             newH.RetractSpeed = oldH.ppRetractSpeed;
             newH.ModelVolume = oldH.ppVolumeMl;
@@ -212,26 +238,26 @@ namespace LiberatingMarsCLI
             newH.BottomLiftSpeed2 = oldH.ppRetractSpeed;
             newH.LiftingDistance2 = oldH.ppLiftHeight - newH.LiftDistance;
             newH.LiftingSpeed2 = oldH.ppRetractSpeed;
-            newH.RetractDistance2 = 4.0f;
-            newH.RetractSpeed2 = 30.0f;
+            newH.RetractDistance2 = slowRetractHeight;
+            newH.RetractSpeed2 = oldH.ppLiftSpeed;
             newH.RestTimeAfterLift = oldH.sRestTimeAfterLift;
             newH.PrinterNameOffset = oldH.sMachineNameAddress;
             newH.PrinterNameSize = oldH.sMachineNameSize;
             newH.unknown12 = 0xF;
             newH.unknown13 = 0;
             newH.unknown14 = 0x8;
-            newH.RestTimeAfterRetract = 1f;
-            newH.RestTimeAfterLift_2 = 1f;
+            newH.RestTimeAfterRetract = pauseAfterRetract;
+            newH.RestTimeAfterLift_2 = pauseAfterLift;
             newH.unknown15 = 0;
             newH.BottomRetractSpeed = oldH.ppRetractSpeed;
-            newH.BottomRetractSpeed2 = 30.0f;
+            newH.BottomRetractSpeed2 = oldH.ppLiftSpeed;
             newH.unknown15_2 = 0;
             newH.unknown16 = 4;
             newH.unknown17 = 0;
             newH.unknown18 = 4;
-            newH.RestTimeAfterRetract_2 = 1000.0f;
-            newH.RestTimeAfterLift_3 = 1000.0f;
-            newH.RestTimeBeforeLift = 0.400f;
+            newH.RestTimeAfterRetract_2 = 0f;
+            newH.RestTimeAfterLift_3 = 0f;
+            newH.RestTimeBeforeLift = pauseBeforeLift;
             newH.BottomRetractDistance = oldH.ppBottomLiftHeight - newH.RetractDistance2;
             newH.unknown23 = 302;
             newH.unknown24 = 0x101;
