@@ -1,6 +1,8 @@
 # LiberatingMarsCLI
 **We don't want to be forced into which Slicer we use. Let's change that.**
 
+This takes a v3 .ctb file (unencrypted) and outputs a v4 .ctb file (Encrypted.
+
 ### Usage:
 LiberatingMarsCLI(.exe) <Mandatory Arguments> [Optional Arguments]
   
