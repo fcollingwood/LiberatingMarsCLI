@@ -1,7 +1,11 @@
 # LiberatingMarsCLI
 **We don't want to be forced into which Slicer we use. Let's change that.**
 
-This takes a v3 .ctb file (unencrypted) and outputs a v4 .ctb file (Encrypted.
+This takes a v3 .ctb file (unencrypted) and outputs a v4 .ctb file (Encrypted).
+
+If using Formware, you will need to write a one-line batch file to re-arrange the order of the arguments like so:
+
+ "C:\LiberatingMars\LiberatingMarsCLI.exe" "C:\Program Files\ChiTuBox64 1.9.0\CHITUBOX.exe" "%~1" %~2 %~3 %~4 %~5 %~6
 
 ### Usage:
 LiberatingMarsCLI(.exe) <Mandatory Arguments> [Optional Arguments]
